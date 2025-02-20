@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS joomla_db;
+
+CREATE USER IF NOT EXISTS 'joomla'@'%' IDENTIFIED BY 'brasil123';
+
+GRANT ALL PRIVILEGES ON joomla_db.* TO 'joomla'@'%';
+
+FLUSH PRIVILEGES;

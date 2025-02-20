@@ -1,0 +1,52 @@
+# Executar passos apos subir os containers
+# apt-get update && apt-get install -y unzip && \
+# unzip -o /var/www/html/quickstart.zip -d /var/www/html && \
+# chown -R www-data:www-data /var/www/html && \
+# chmod -R 755 /var/www/html
+
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: joomla-db
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: joomla_db
+      MYSQL_PASSWORD: root
+
+  joomla:
+    build:
+      context: .
+    container_name: joomla-container
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      JOOMLA_DB_HOST: mysql
+      JOOMLA_DB_USER: joomla_user
+      JOOMLA_DB_PASSWORD: joomla_pass
+      JOOMLA_DB_NAME: joomla_db
+    ports:
+      - "8081:80"
+    volumes:
+      - joomla_data:/var/www/html
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "8081:80"
+    restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+
+volumes:
+  db_data: {}
+  joomla_data: {}
