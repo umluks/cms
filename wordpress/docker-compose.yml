@@ -1,0 +1,40 @@
+version: "3.9" # Versão do Docker Compose, recomendada para compatibilidade e novos recursos
+
+services: # Definição dos serviços que serão utilizados no ambiente Docker
+  db: # Serviço para o banco de dados MySQL
+    image: mysql:8.0 # Usando a imagem oficial do MySQL, versão 8.0
+    volumes:
+      - db_data:/var/lib/mysql # Define o volume para persistir os dados do MySQL (armazena dados em disco fora do container)
+    restart: always # Configuração para reiniciar o container automaticamente se ele falhar
+    environment: # Definição de variáveis de ambiente para configuração do MySQL
+      MYSQL_ROOT_PASSWORD: root # Senha do usuário root do MySQL
+      MYSQL_DATABASE: lucasdosanjos # Nome do banco de dados que será criado no MySQL
+      MYSQL_USER: wordpress-lucas # Usuário para o MySQL
+      MYSQL_PASSWORD: brasil123 # Senha para o usuário wordpress-lucas
+
+  wordpress: # Serviço para a aplicação WordPress
+    depends_on:
+      - db # Garante que o serviço WordPress só será iniciado após o serviço do banco de dados MySQL estar pronto
+    image: wordpress:6.3 # Usando a imagem oficial do WordPress, versão 6.3
+    ports:
+      - "8000:80" # Mapeia a porta 8000 do host (máquina local) para a porta 80 do container (onde o WordPress está rodando)
+    restart: always # Garante que o container reinicie automaticamente caso falhe
+    environment: # Configurações de ambiente para o WordPress
+      WORDPRESS_DB_HOST: db:3306 # Define o host do banco de dados como o serviço 'db' e a porta padrão do MySQL (3306)
+      WORDPRESS_DB_USER: wordpress-lucas # Usuário que será usado pelo WordPress para conectar ao MySQL
+      WORDPRESS_DB_PASSWORD: brasil123 # Senha que será usada pelo WordPress para se conectar ao MySQL
+      WORDPRESS_DB_NAME: lucasdosanjos # Define o nome do banco de dados que o WordPress utilizará
+
+  phpmyadmin: # Serviço para a interface gráfica do phpMyAdmin para gerenciar o MySQL
+    depends_on:
+      - db # Garante que o serviço phpMyAdmin só será iniciado após o MySQL estar pronto
+    image: phpmyadmin/phpmyadmin:latest # Usando a imagem mais recente do phpMyAdmin
+    ports:
+      - "8081:80" # Mapeia a porta 8081 do host para a porta 80 do container (onde o phpMyAdmin está rodando)
+    restart: always # Garante que o container reinicie automaticamente caso falhe
+    environment: # Variáveis de ambiente para o phpMyAdmin
+      PMA_HOST: db # Define o host para o phpMyAdmin se conectar ao MySQL (nome do serviço 'db')
+      MYSQL_ROOT_PASSWORD: root # Senha do usuário root do MySQL, necessária para autenticação no phpMyAdmin
+
+volumes: # Definição dos volumes, que são usados para persistir dados fora do container
+  db_data: # Volume para persistir os dados do banco de dados MySQL
